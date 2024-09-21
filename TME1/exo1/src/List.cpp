@@ -1,4 +1,7 @@
+#include "List.h"
 
+
+//FAUTE : Abscence de "#include "List.h"
 namespace pr {
 
 // ******************* Chainon
@@ -9,15 +12,18 @@ size_t Chainon::length() {
 	if (next != nullptr) {
 		len += next->length();
 	}
-	return length();
+	// FAUTE : Renvoie un appelle récursif plutôt que le résultat
+	return len;
 }
 
-void Chainon::print (std::ostream & os) {
+//FAUTE : Abscence du mot clefs "const" qui lui est présent dans la déclaration.
+void Chainon::print (std::ostream & os) const {
 	os << data ;
 	if (next != nullptr) {
 		os << ", ";
+		// FAUTE : l'instruction était à l'extérieur de la condition
+		next->print(os);
 	}
-	next->print(os);
 }
 
 // ******************  List
@@ -45,7 +51,9 @@ void List::push_front (const std::string& val) {
 	tete = new Chainon(val,tete);
 }
 
-bool empty() {
+
+// FAUTE : Abscence namespace List
+bool List::empty() {
 	return tete == nullptr;
 }
 
@@ -57,8 +65,7 @@ size_t List::size() const {
 	}
 }
 
-} // namespace pr
-
+// Faute : doit se situer dans l'espace de nom pr
 std::ostream & operator<< (std::ostream & os, const pr::List & vec)
 {
 	os << "[";
@@ -68,4 +75,8 @@ std::ostream & operator<< (std::ostream & os, const pr::List & vec)
 	os << "]";
 	return os;
 }
+
+}; // namespace pr
+
+
 

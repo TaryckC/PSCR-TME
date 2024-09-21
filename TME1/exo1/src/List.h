@@ -35,9 +35,8 @@ public:
 
 	void push_back (const std::string& val) ;
 
-	void push_front (const std::string& val) {
-		tete = new Chainon(val,tete);
-	}
+	//FAUTE : Définition de la fonction dans le fichier h. Donnant lieu a une redéfinition dans List.cpp
+	void push_front (const std::string& val);
 
 	bool empty() ;
 
