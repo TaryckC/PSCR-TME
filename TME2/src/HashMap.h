@@ -13,9 +13,32 @@
 using namespace std;
 template <typename K, typename V>
 class HashMap {
+public :
+
 	struct Entry {
 		const K key;
 		V value;
+	};
+
+	struct notConstEntry {
+		K key;
+		V value;
+		notConstEntry(const std::string& k, int v) : key(k), value(v) {}
+		notConstEntry(const Entry& autre) : key(autre.key), value(autre.value) {}
+		notConstEntry& operator=(const Entry& autre) {
+				        if (this != &autre) {
+				            key = autre.key;
+				            value = autre.value;
+				        }
+				        return *this;
+				}
+		notConstEntry& operator=(const notConstEntry& autre) {
+						        if (this != &autre) {
+						            key = autre.key;
+						            value = autre.value;
+						        }
+						        return *this;
+						}
 	};
 	typedef vector<forward_list<Entry>> buckets_t;
 	buckets_t buckets;
@@ -39,26 +62,24 @@ class HashMap {
 		size_t h=hash<K>()(key);
 		size_t index=h%buckets.size();
 
-		const auto& list = buckets[index];
-		for (const auto& ent:list) {
+		auto& list = buckets[index];
+		for (auto& ent:list) {
 			if (ent.key == key) {
 				ent.value = value;
 				return true;
 			}
 		}
-		list.push_front(new Entry(key, value));
+		list.push_front(Entry{key, value});
 		return false;
 	}
 
 	size_t size() {
 		size_t currentSize = 0;
 		for (size_t i=0; i< buckets.size(); ++i) {
-			if (buckets[i].size != 0) {
 				const auto& list = buckets[i];
 				for (const auto& ent:list) {
 						currentSize++;
 				}
-			}
 		}
 		return currentSize;
 	}

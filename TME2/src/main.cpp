@@ -111,7 +111,6 @@ int main () {
 	regex re( R"([^a-zA-Z])");
 	while (input >> word) {
 		// informe quant à la présence ou non d'un mot dans le vecteur
-		bool alreadyIn = false;
 		// élimine la ponctuation et les caractères spéciaux
 		word = regex_replace ( word, re, "");
 
@@ -124,13 +123,14 @@ int main () {
 			cout << nombre_lu << ": "<< word << endl;
 
 		// Vérification de la présence de mot
-		auto currentEntry = hMap.get(word);
-		if (currentEntry != nullptr) {
-			*currentEntry++;
-		}
-		else {
+		const auto currentEntry = hMap.get(word);
+		if (currentEntry == nullptr) {
 			hMap.put(word, 1);
 		}
+		else {
+			hMap.put(word, *currentEntry +1);
+		}
+		nombre_lu++;
 	}
 	input.close();
 
@@ -141,10 +141,30 @@ int main () {
 			<< duration_cast<milliseconds>(end - start).count()
 	        << "ms.\n";
 
+	std::vector<HashMap<string, int>::notConstEntry> allWords;
+
+	for (const auto& bucket:hMap.buckets) {
+		for (const auto& entry:bucket) {
+			allWords.push_back(entry);
+		}
+	}
+
+
+
+	std::sort(allWords.begin(), allWords.end(), [] (const HashMap<std::string, int>::notConstEntry &a, const HashMap<std::string, int>::notConstEntry &b) {
+	    return a.value > b.value;
+	});
+
 	cout << "Found a total of " << hMap.size() << " words." << endl;
 
-	cout << "War" << " apparait " << hMap.get("war") << " fois, ";
-    cout     << "Peace" << " apparait " << hMap.get("peace") << " fois, ";
+	cout << "War" << " apparait " << *hMap.get("war") << " fois, ";
+    cout     << "Peace" << " apparait " << *hMap.get("peace") << " fois. ";
+
+    cout << "Most used words : ";
+    for (int i=0;  i<10; i++) {
+    	cout << i+1 << " Position : " << allWords[i].key << " : "<< allWords[i].value <<"\n";
+    }
+    cout << endl;
 
     return 0;
 
