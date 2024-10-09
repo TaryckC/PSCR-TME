@@ -2,7 +2,7 @@
 #include <random>
 #include <iostream>
 #include <chrono>
-
+//2
 using namespace std;
 
 const int NB_THREAD = 10;
