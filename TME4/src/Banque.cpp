@@ -45,4 +45,7 @@ bool Banque::comptabiliser (int attendu) const {
 	}
 	return bilan == attendu;
 }
+
+// Un thread comptable qui tourne en concurrence aec les autre threads ne serait pas satisfait de la synchronisation acutelle car,
+// pendant que lui compte, les comptes continuent de s'échanger de l'argent -> après que le comptable ait traité un compte, celui-ci peut dont être dans un état différent.
 }

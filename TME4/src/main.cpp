@@ -9,7 +9,7 @@ const int NB_THREAD = 10;
 const int ValueComptes = 100;
 
 void work(pr::Banque& bank) {
-	for (int i=0; i<1000; ++i) {
+	for (int i=0; i<50000; ++i) {
 		cout << "Passage " << i <<endl;
 		random_device rd;
 		mt19937 rng(rd());
@@ -22,26 +22,31 @@ void work(pr::Banque& bank) {
 	}
 }
 
+void comptableWord(pr::Banque& bank, int soldeInitial) {
+	bank.comptabiliser(soldeInitial);
+}
+
 int main () {
 	vector<thread> threads;
 	threads.reserve(NB_THREAD);
 
 	//Création Banque :
 	pr::Banque bank(10,ValueComptes);
+	int soldeInitial = NB_THREAD * ValueComptes;
 
 	// TODO : creer	//Création des threads :
 	for (int i=0; i<NB_THREAD; ++i){
 		threads.emplace_back(thread(work, ref(bank)));
 	}
+	threads.emplace_back(thread(comptableWord, soldeInitial));
 
 	for (auto & t : threads) {
 		t.join();
 	}
 
 	// TODO : tester solde = NB_THREAD * JP
-	int soldeInitial = NB_THREAD * ValueComptes;
 
-	bank.comptabiliser(soldeInitial);
+	//bank.comptabiliser(soldeInitial);
 
 	return 0;
 }
