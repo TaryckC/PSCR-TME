@@ -3,6 +3,8 @@
 
 #include <cstdlib>
 #include <mutex>
+#include <cstring>
+#include <condition_variable>
 
 namespace pr {
 
@@ -15,6 +17,10 @@ class Queue {
 	size_t sz;
 	mutable std::mutex m;
 
+	//Condtion varable
+	std::condition_variable cond;
+	bool isBlocking;
+
 	// fonctions private, sans protection mutex
 	bool empty() const {
 		return sz == 0;
@@ -26,6 +32,7 @@ public:
 	Queue(size_t size) :allocsize(size), begin(0), sz(0) {
 		tab = new T*[size];
 		memset(tab, 0, size * sizeof(T*));
+		isBlocking = true;
 	}
 	size_t size() const {
 		std::unique_lock<std::mutex> lg(m);
@@ -33,6 +40,9 @@ public:
 	}
 	T* pop() {
 		std::unique_lock<std::mutex> lg(m);
+		while(empty() && isBlocking) {
+			cond.wait(lg);
+		}
 		if (empty()) {
 			return nullptr;
 		}
@@ -40,15 +50,22 @@ public:
 		tab[begin] = nullptr;
 		sz--;
 		begin = (begin + 1) % allocsize;
+		lg.unlock();
+		cond.notify_all();
 		return ret;
 	}
 	bool push(T* elt) {
 		std::unique_lock<std::mutex> lg(m);
+		while(full() && isBlocking) {
+			cond.wait(lg);
+		}
 		if (full()) {
 			return false;
 		}
 		tab[(begin + sz) % allocsize] = elt;
 		sz++;
+		lg.unlock();
+		cond.notify_all();
 		return true;
 	}
 	~Queue() {
@@ -58,6 +75,11 @@ public:
 			delete tab[ind];
 		}
 		delete[] tab;
+	}
+
+	//Méthodes ajoutées :
+	void setBlocking(bool blocking) {
+		isBlocking = blocking;
 	}
 };
 
