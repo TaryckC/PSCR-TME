@@ -5,6 +5,7 @@
 #include <mutex>
 #include <cstring>
 #include <condition_variable>
+#include <iostream>
 
 namespace pr {
 
@@ -39,6 +40,7 @@ public:
 		return sz;
 	}
 	T* pop() {
+		//std::cout << "POPED" << std::endl;
 		std::unique_lock<std::mutex> lg(m);
 		while(empty() && isBlocking) {
 			cond.wait(lg);
@@ -52,9 +54,11 @@ public:
 		begin = (begin + 1) % allocsize;
 		lg.unlock();
 		cond.notify_all();
+    	//std::cout << "Queue poped" << std::endl;
 		return ret;
 	}
 	bool push(T* elt) {
+		//std::cout << "PUSHED" << std::endl;
 		std::unique_lock<std::mutex> lg(m);
 		while(full() && isBlocking) {
 			cond.wait(lg);
@@ -80,6 +84,11 @@ public:
 	//Méthodes ajoutées :
 	void setBlocking(bool blocking) {
 		isBlocking = blocking;
+	}
+
+	bool isQueueBlocked() {
+		std::unique_lock<std::mutex> lg(m);
+		return isBlocking;
 	}
 };
 

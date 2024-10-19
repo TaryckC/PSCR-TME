@@ -114,28 +114,39 @@ void exportImage(const char * path, size_t width, size_t height, Color * pixels)
 		Color* pixels;
 	public :
 		PixelJob(const Scene::screen_t & screen, int x, int y, Scene& scene, vector<Vec3D>& lights, Color* pixels)
-			:screen(screen), x(x), y(y), scene(scene), lights(lights), pixels(pixels) {}
+			:screen(screen), x(x), y(y), scene(scene), lights(lights), pixels(pixels) {
+			//std::cout << "pixel created" << std::endl;
+		}
 
 		void run() {
-			// le point de l'ecran par lequel passe ce rayon
-			auto & screenPoint = screen[y][x];
-			// le rayon a inspecter
-			Rayon  ray(scene.getCameraPos(), screenPoint);
+			for (y=0; y < scene.getHeight(); ++y) {
+				// le point de l'ecran par lequel passe ce rayon
+				//std::cout << " ######### Entering run PixelJob" << std::endl;
+				auto & screenPoint = screen[y][x];
+				// le rayon a inspecter
+				//std::cout << "screenPoint constructor done in PixelJob" << std::endl;
+				Rayon  ray(scene.getCameraPos(), screenPoint);
+				//std::cout << "Ray constructor done in PixelJob" << std::endl;
 
-			int targetSphere = findClosestInter(scene, ray);
+				int targetSphere = findClosestInter(scene, ray);
 
-			if (targetSphere == -1) {
-				// keep background color
-				//continue ;
-			} else {
-				const Sphere & obj = *(scene.begin() + targetSphere);
-				// pixel prend la couleur de l'objet
-				Color finalcolor = computeColor(obj, ray, scene.getCameraPos(), lights);
-				// le point de l'image (pixel) dont on vient de calculer la couleur
-				Color & pixel = pixels[y*scene.getHeight() + x];
-				// mettre a jour la couleur du pixel dans l'image finale.
-				pixel = finalcolor;
+				if (targetSphere == -1) {
+					//std::cout << "################ PixelJob if condition true" << std::endl;
+					// keep background color
+					//continue ;
+				} else {
+					const Sphere & obj = *(scene.begin() + targetSphere);
+					// pixel prend la couleur de l'objet
+					Color finalcolor = computeColor(obj, ray, scene.getCameraPos(), lights);
+					// le point de l'image (pixel) dont on vient de calculer la couleur
+					Color & pixel = pixels[y*scene.getHeight() + x];
+					// mettre a jour la couleur du pixel dans l'image finale.
+					pixel = finalcolor;
+					//std::cout << "Passage run" << std::endl;
+				}
 			}
+
+			//std::cout << "Sortie de run PixelJob" << std::endl;
 
 		}
 	};
@@ -172,13 +183,18 @@ int main () {
 	Pool pool(1000);
 	pool.start(8);
 
+	//std::cout << "scene width" << scene.getWidth() << std::endl;
 	for (int x =0 ; x < scene.getWidth() ; x++) {
-		for (int  y = 0 ; y < scene.getHeight() ; y++) {
-			pool.submit(new PixelJob(screen, x, y, scene ,lights,pixels));
-		}
+			std::cout << "X = " << x << std::endl;
+			//std::cout << "Y = " << y << std::endl;
+			//std::cout << "Passage boucle main" << std::endl;
+			pool.submit(new PixelJob(screen, x, 0, scene ,lights,pixels));
+			//std::cout << "pool submit done" << std::endl;
 	}
 
+	std::cout << "Fin boucle main" << std::endl;
 	pool.stop();
+	std::cout << "Fin pool.stop main" << std::endl;
 
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	    std::cout << "Total time "
@@ -186,7 +202,8 @@ int main () {
 	              << "ms.\n";
 
 	exportImage("toto.ppm",scene.getWidth(), scene.getHeight() , pixels);
-
+	std::cout << "Fin main" << std::endl;
 	return 0;
 }
+
 
