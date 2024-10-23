@@ -1,8 +1,11 @@
 #include <ctime>
 #include <cstdlib>
 #include "rsleep.h"
+#include <unistd.h>
+#include <signal.h>
 
 void randsleep() {
+  srand(getpid());
   int r = rand();
   double ratio = (double)r / (double) RAND_MAX;
   struct timespec tosleep;

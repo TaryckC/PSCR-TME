@@ -7,6 +7,9 @@ using namespace std;
 namespace pr {
 
 void Banque::transfert(size_t deb, size_t cred, unsigned int val) {
+	// Question 8
+	//lock_guard<mutex> lock(mtx);
+
 	Compte & debiteur = comptes[deb];
 	Compte & crediteur = comptes[cred];
 	// Question 4
@@ -24,12 +27,18 @@ void Banque::transfert(size_t deb, size_t cred, unsigned int val) {
 	//On aurait aussi pu simplement utiliser les du plus petits au plus grands par exemple.
 }
 size_t Banque::size() const {
+	// Question 8
+	//lock_guard<mutex> lock(mtx);
 	return comptes.size();
 }
 bool Banque::comptabiliser (int attendu) const {
+	// Question 8
+	//lock_guard<mutex> lock(mtx);
 	int bilan = 0;
 	int id = 0;
 	for (const auto & compte : comptes) {
+		// Question 10
+		compte.lock();
 		if (compte.getSolde() < 0) {
 			cout << "Compte " << id << " en négatif : " << compte.getSolde() << endl;
 		}
@@ -44,5 +53,13 @@ bool Banque::comptabiliser (int attendu) const {
 		cout << "Le comptable : =D" << endl;
 	}
 	return bilan == attendu;
+
+	for (const auto & compte : comptes) {
+		compte.unlock();
+	}
+
 }
+
+// Un thread comptable qui tourne en concurrence aec les autre threads ne serait pas satisfait de la synchronisation acutelle car,
+// pendant que lui compte, les comptes continuent de s'échanger de l'argent -> après que le comptable ait traité un compte, celui-ci peut dont être dans un état différent.
 }

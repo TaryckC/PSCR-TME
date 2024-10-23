@@ -18,8 +18,21 @@ void work(pr::Banque& bank) {
 	    uniform_int_distribution<mt19937::result_type> sleepDuration(0,20);
 
 	    bank.transfert(compteId(rng),compteId(rng), transferedValue(rng));
+<<<<<<< HEAD
 		this_thread::sleep_for(chrono::milliseconds(sleepDuration(rng)));
 	}
+=======
+		//this_thread::sleep_for(chrono::milliseconds(sleepDuration(rng)));
+	}
+}
+
+void comptableWork(pr::Banque& bank, int soldeInitial) {
+	//this_thread::sleep_for(chrono::milliseconds(2000));
+	while(bank.comptabiliser(soldeInitial))
+	bank.comptabiliser(soldeInitial);
+	cout << "########################################################################################### FIN";
+	exit(0);
+>>>>>>> branch 'master' of https://github.com/TaryckC/PSCR-TME.git
 }
 
 int main () {
@@ -28,20 +41,35 @@ int main () {
 
 	//Création Banque :
 	pr::Banque bank(10,ValueComptes);
+<<<<<<< HEAD
 
 	// TODO : creer	//Création des threads :
 	for (int i=0; i<NB_THREAD; ++i){
 		threads.emplace_back(thread(work, ref(bank)));
 	}
+=======
+	int soldeInitial = NB_THREAD * ValueComptes;
+
+	// TODO : creer	//Création des threads :
+	for (int i=0; i<NB_THREAD; ++i){
+		threads.emplace_back(thread(work, ref(bank)));
+	}
+	threads.emplace_back(thread(comptableWork, ref(bank), soldeInitial));
+>>>>>>> branch 'master' of https://github.com/TaryckC/PSCR-TME.git
 
 	for (auto & t : threads) {
 		t.join();
 	}
 
 	// TODO : tester solde = NB_THREAD * JP
+<<<<<<< HEAD
 	int soldeInitial = NB_THREAD * ValueComptes;
 
 	bank.comptabiliser(soldeInitial);
+=======
+
+	//bank.comptabiliser(soldeInitial);
+>>>>>>> branch 'master' of https://github.com/TaryckC/PSCR-TME.git
 
 	return 0;
 }
