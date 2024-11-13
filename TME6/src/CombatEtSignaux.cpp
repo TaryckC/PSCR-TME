@@ -20,6 +20,11 @@ void handler(int sig) {
 
 }
 
+void defenseHandlerChild(int sig) {
+	cout << "Fils : Coup paré." << endl;
+
+}
+
 void attaque(pid_t adversaire) {
 	//Création du mask
 	sigset_t setNeg;
@@ -40,16 +45,43 @@ void attaque(pid_t adversaire) {
 }
 
 void defense() {
-	sigset_t setNeg;
-	sigfillset(&setNeg);
-	sigdelset(&setNeg, SIGINT);
+	if (fils == 0) {
+	        sigset_t setNeg, oldSet;
+	        sigfillset(&oldSet);
+	        sigfillset(&setNeg);
+	        sigdelset(&setNeg, SIGINT);
 
-	struct sigaction act;
-	sigfillset(&act.sa_mask);
-	act.sa_flags = 0;
-	act.sa_handler = SIG_IGN;
-	sigaction(SIGINT, &act, NULL);
-	randsleep();
+	        struct sigaction act;
+	        act.sa_handler = defenseHandlerChild;
+	        sigemptyset(&act.sa_mask);
+	        act.sa_flags = 0;
+	        sigaction(SIGINT, &act, NULL);
+
+	        sigprocmask(SIG_BLOCK, &oldSet, NULL);
+
+	        cout << "Fils : En défense, en attente d'une attaque..." << endl;
+	        randsleep();
+
+	        cout << "Fils : En attente de SIGINT pour parer l'attaque..." << endl;
+	        sigsuspend(&setNeg);
+
+	        /*
+	         * Le combat n'est plus équitable, car dès que le fils rentre en défense, il ne prendra jamais de dégat
+	         *  car le père attaquera, le fils parira et le père s'endormira et sera vulnérable.
+	         */
+	}
+	else {
+		sigset_t setNeg;
+		sigfillset(&setNeg);
+		sigdelset(&setNeg, SIGINT);
+
+		struct sigaction act;
+		sigfillset(&act.sa_mask);
+		act.sa_flags = 0;
+		act.sa_handler = SIG_IGN;
+		sigaction(SIGINT, &act, NULL);
+		randsleep();
+	}
 }
 
 void combat(pid_t adversaire) {
@@ -65,7 +97,7 @@ void combat(pid_t adversaire) {
 	}
 }
 
-int main() {
+int main1() {
 	fils = fork();
 	if (fils == 0) {
 		combat(getppid());

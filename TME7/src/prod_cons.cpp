@@ -22,7 +22,7 @@ void consomateur (Stack<char> * stack) {
 	}
 }
 
-int main () {
+int main0 () {
 	Stack<char> * s = new Stack<char>();
 
 	pid_t pp = fork();
