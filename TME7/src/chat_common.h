@@ -25,7 +25,10 @@
 
 #define MAX_MESS 50
 #define MAX_USERS 10
-#define TAILLE_MESS 10
+#define TAILLE_MESS 100
+
+//Ajouter pour le tp
+#define FREE_MESSAGE_SPACE -6
 
 struct message {
   long type;
