@@ -15,28 +15,23 @@ int main(int argc, char **argv) {
 	pipe(tube);
 	pid_t fils;
 	bool pipeFound = false;
-	char* args1[argv];
-	char* args2[argv];
+	char* args1[argc];
+	char* args2[argc];
 	int ind1 = 0; //Nombre d'arguments
 	int ind2 = 0; //Le premier élément est réservé au résultat de la commande avant pipe
 
+    for (int i = 1; i < argc; ++i) {
+        if (strcmp(argv[i], "|") == 0) {
+            pipeFound = true;
+        } else if (pipeFound) {
+            args2[ind2++] = argv[i];
+        } else {
+            args1[ind1++] = argv[i];
+        }
+    }
 
-	for(int i=1; i< argc; ++i) {
-		if (pipeFound) {
-			args1[ind2++] = argv[i];
-		}
-		else {
-			if (argv[i] == "|") {
-				args1[i] = "OxO"; //Sentinelle
-				pipeFound = true;
-			}
-			else {
-				args1[ind1++] = argv[i];
-			}
-
-		}
-	}
-	args2[ind2+1] = "OxO";
+    args1[ind1] = nullptr;
+    args2[ind2] = nullptr;
 
 	if (pipe(tube) == -1) {
 		perror("pipe");
@@ -54,7 +49,7 @@ int main(int argc, char **argv) {
 		close(tube[1]);
 		close(tube[0]);
 
-		if(execvp(args2[0], args2) == -1) {
+		if(execvp(args2[0], args1) == -1) {
 			perror("execvp failed");
 			exit(3);
 		}
@@ -66,7 +61,7 @@ int main(int argc, char **argv) {
 		close(tube[1]);
 		close(tube[0]);
 
-		if(execvp(args1[0], args1) == -1) {
+		if(execvp(args1[0], args2) == -1) {
 			perror("execvp failed");
 			exit(4);
 		}
