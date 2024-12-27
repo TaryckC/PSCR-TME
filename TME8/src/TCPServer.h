@@ -4,6 +4,7 @@
 #include <thread>
 #include "ServerSocket.h"
 #include "ConnectionHandler.h"
+#include <vector>
 
 namespace pr {
 
@@ -12,6 +13,7 @@ class TCPServer {
 	ServerSocket * ss; // la socket d'attente si elle est instanciee
 	ConnectionHandler * handler; // le gestionnaire de session passe a la constru
 	// a completer
+	std::vector<std::thread> threads;
 public :
 	TCPServer(ConnectionHandler * handler): ss(nullptr),handler(handler) {}
 	// Tente de creer une socket d'attente sur le port donné
@@ -19,6 +21,9 @@ public :
 
 	// stoppe le serveur
 	void stopServer () ;
+
+	//Job des threads :
+	virtual void job(Socket socket);
 };
 
 } // ns pr
